@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CovidAPI.Models;
+using CovidAPI.DTOs;
 
 namespace CovidAPI.Controllers
 {
@@ -21,38 +22,79 @@ namespace CovidAPI.Controllers
         }
 
         [HttpGet("cases")]
-        public async Task<ActionResult<IEnumerable<DayStats>>> GetRegionStatsFromTo([FromQuery] string region, [FromQuery] DateOnly from, [FromQuery] DateOnly to)
+        public async Task<ActionResult<IEnumerable<CasesDTO>>> GetRegionStatsFromTo([FromQuery] string region, [FromQuery] string from, [FromQuery] string to)
         {
             try {
-                DateTime DateFrom = from.ToDateTime(TimeOnly.Parse("00:00"));
-                DateTime DateTo = to.ToDateTime(TimeOnly.Parse("00:00"));
+                DateTime DateFrom = DateTime.ParseExact(from, "yyyy-MM-dd", null);
+                DateTime DateTo = DateTime.ParseExact(to, "yyyy-MM-dd", null);
+                region = region.ToUpper();
 
+                var cases = await _context.DayStats
+                    .Include(dayStats => dayStats.Regions)
+                    .Where(d => d.Date >= DateFrom && d.Date <= DateTo)
+                    .Select(ds => new DayStats {
+                        Date = ds.Date,
+                        Regions = ds.Regions.Where(r => r.Name == region).ToList()
+                    })
+                    .Select(dto => new CasesDTO {
+                        Date = dto.Date,
+                        RegionName = dto.Regions.First().Name,
+                        ActiveCases = dto.Regions.First().Active,
+                        Vaccinated1st = dto.Regions.First().Vaccinated1st,
+                        Vaccinated2nd = dto.Regions.First().Vaccinated2nd,
+                        Deceased = dto.Regions.First().ToDateDeceased
+                    })
+                    .ToListAsync();
+
+                return cases;
             }
-            catch (Exception ex) { 
-                
+            catch (Exception ex) {
+                return NotFound("Something went wrong.");
             }
-            return NotFound();
         }
 
         [HttpGet("lastweek")]
-        public async Task<ActionResult<DayStats>> GetDayStats()
-        {
-            return NotFound();
-        }
-        [HttpGet("all")]
-        public async Task<ActionResult<List<DayStats>>> GetStats() {
-            var stats = await _context.DayStats.Include(dayStats => dayStats.Regions).ToListAsync();
+        public async Task<ActionResult<IEnumerable<WeekAverageDTO>>> GetStatsLastweek() {
+            try {
+                DateTime DateNow = DateTime.Now;
+                DateTime DateStart = DateNow.AddDays(-7);
 
-            if (stats == null) {
-                return NotFound();
+                var last = _context.DayStats
+                    .Include(dayStats => dayStats.Regions)
+                    .Where(d => d.Date >= DateStart && d.Date <= DateNow)
+                    .SelectMany(ds => ds.Regions).ToList()
+                    .GroupBy(r => r.Name);
+
+                List<WeekAverageDTO> averageWeek = new List<WeekAverageDTO>();
+
+                foreach (var l in last) {
+                    WeekAverageDTO weekAverage = new WeekAverageDTO();
+                    weekAverage.RegionName = l.Key;
+                    weekAverage.AverageNewCases = ComputeAverageNewCases(l.ToList());
+                    averageWeek.Add(weekAverage);
+                }
+
+                return averageWeek;
+            }
+            catch (Exception ex) {
+                return NotFound("Something went wrong.");
+            }
+        }
+
+        private static double ComputeAverageNewCases(IEnumerable<Region> regions) {
+            int sum = 0;
+            int lastDay = -1;
+            foreach (var region in regions) {
+                if (lastDay == -1) {
+                    lastDay = region.ToDateConfirmed;
+                }
+                else {
+                    sum += (region.ToDateConfirmed - lastDay);
+                    lastDay = region.ToDateConfirmed;
+                }
             }
 
-            return stats;
-        }
-
-        private bool DayStatsExists(long id)
-        {
-            return _context.DayStats.Any(e => e.Id == id);
+            return sum / 7;
         }
     }
 }
