@@ -21,23 +21,26 @@ namespace CovidAPI.Controllers
             _context = context;
         }
 
-        [HttpGet("cases/{region}/{from}/{to}")]
-        public async Task<ActionResult<IEnumerable<Region>>> GetRegionStatsFromTo(RegionName region, DateOnly from, DateOnly to)
+        [HttpGet("cases")]
+        public async Task<ActionResult<IEnumerable<DayStats>>> GetRegionStatsFromTo([FromQuery] RegionNameEnum region, [FromQuery] DateOnly from, [FromQuery] DateOnly to)
         {
             return NotFound();
         }
 
-        [HttpGet("cases/lastweek")]
-        public async Task<ActionResult<DayStats>> GetDayStats(long id)
+        [HttpGet("lastweek")]
+        public async Task<ActionResult<DayStats>> GetDayStats()
         {
-            var dayStats = await _context.DayStats.FindAsync(id);
+            return NotFound();
+        }
+        [HttpGet("all")]
+        public async Task<ActionResult<List<DayStats>>> GetStats() {
+            var stats = await _context.DayStats.Include(dayStats => dayStats.Regions).ToListAsync();
 
-            if (dayStats == null)
-            {
+            if (stats == null) {
                 return NotFound();
             }
 
-            return dayStats;
+            return stats;
         }
 
         private bool DayStatsExists(long id)

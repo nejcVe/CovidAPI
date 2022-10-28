@@ -1,17 +1,11 @@
-﻿using CovidAPI.Enums;
-
-namespace CovidAPI.Models
-{
+﻿namespace CovidAPI.Models {
     public class Region {
-
         public long Id { get; set; }
-        public RegionName Name { get; set; }
-        public int CasesActive { get; set; }
-        public int CasesTodateConfirmed { get; set; }
-        public int CasesTodateDeceased { get; set; }
-        public int CasesTodateVaccinated1 { get; set; }
-        public int CasesTodateVaccinated2 { get; set; }
-        public int CasesTodateVaccinated3 { get; set; }
-
+        public int Active { get; set; }
+        public int ToDateConfirmed { get; set; }
+        public int ToDateDeceased { get; set; }
+        public int Vaccinated1st { get; set; }
+        public int Vaccinated2nd { get; set; }
+        public int Vaccinated3rd { get; set; }
     }
 }
