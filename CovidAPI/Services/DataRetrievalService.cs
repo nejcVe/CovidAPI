@@ -2,7 +2,6 @@
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using CovidAPI.Models;
-using CovidAPI.Enums;
 using Microsoft.VisualBasic.FileIO;
 using System.Data;
 using static System.Net.WebRequestMethods;
@@ -69,6 +68,9 @@ namespace CovidAPI.Services {
                 csvReader.HasFieldsEnclosedInQuotes = false;
                 string[] colFields = csvReader.ReadFields();
                 Console.WriteLine(colFields.Length.ToString());
+                int[] indices = new int[] { 1, 10, 16, 22, 28, 34, 40, 46, 52, 58, 64, 73 };
+                string[] regionNames = new string[] {"CE", "KK", "KP", "KR", "LJ", "MB", "MS", "NG", "NM", "PO", "SG", "ZA"};
+                Region r = new Region();
 
                 while (!csvReader.EndOfData) {
                     string[] fieldData = csvReader.ReadFields();
@@ -84,19 +86,12 @@ namespace CovidAPI.Services {
                             fieldData[i] = "0";
                         }
                     }
-                    day.Regions.Add(ReadRegion(fieldData, 1));
-                    day.Regions.Add(ReadRegion(fieldData, 10));
-                    day.Regions.Add(ReadRegion(fieldData, 16));
-                    day.Regions.Add(ReadRegion(fieldData, 22));
-                    day.Regions.Add(ReadRegion(fieldData, 28));
-                    day.Regions.Add(ReadRegion(fieldData, 34));
-                    day.Regions.Add(ReadRegion(fieldData, 40));
-                    day.Regions.Add(ReadRegion(fieldData, 46));
-                    day.Regions.Add(ReadRegion(fieldData, 52));
-                    day.Regions.Add(ReadRegion(fieldData, 58));
-                    day.Regions.Add(ReadRegion(fieldData, 64));
-                    day.Regions.Add(ReadRegion(fieldData, 73));
 
+                    for (int i = 0; i < indices.Length; i++) {
+                        r = ReadRegion(fieldData, indices[i]);
+                        r.Name = regionNames[i];
+                        day.Regions.Add(r);
+                    }
 
                     _context.DayStats.Add(day);
                     await _context.SaveChangesAsync();

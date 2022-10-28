@@ -1,6 +1,7 @@
 ﻿namespace CovidAPI.Models {
     public class Region {
         public long Id { get; set; }
+        public string? Name { get; set; }
         public int Active { get; set; }
         public int ToDateConfirmed { get; set; }
         public int ToDateDeceased { get; set; }

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CovidAPI.Models;
-using CovidAPI.Enums;
 
 namespace CovidAPI.Controllers
 {
@@ -22,8 +21,16 @@ namespace CovidAPI.Controllers
         }
 
         [HttpGet("cases")]
-        public async Task<ActionResult<IEnumerable<DayStats>>> GetRegionStatsFromTo([FromQuery] RegionNameEnum region, [FromQuery] DateOnly from, [FromQuery] DateOnly to)
+        public async Task<ActionResult<IEnumerable<DayStats>>> GetRegionStatsFromTo([FromQuery] string region, [FromQuery] DateOnly from, [FromQuery] DateOnly to)
         {
+            try {
+                DateTime DateFrom = from.ToDateTime(TimeOnly.Parse("00:00"));
+                DateTime DateTo = to.ToDateTime(TimeOnly.Parse("00:00"));
+
+            }
+            catch (Exception ex) { 
+                
+            }
             return NotFound();
         }
 
