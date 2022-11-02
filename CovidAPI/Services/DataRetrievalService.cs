@@ -24,9 +24,8 @@ namespace CovidAPI.Services {
 
             using (var stream = await response.Content.ReadAsStreamAsync()) {
                 var fileInfo = new FileInfo("Data/region-cases.csv");
-                using (var fileStream = fileInfo.OpenWrite()) {
-                    await stream.CopyToAsync(fileStream);
-                }
+                using var fileStream = fileInfo.OpenWrite();
+                await stream.CopyToAsync(fileStream);
             }
             return 0;
         }
@@ -50,13 +49,14 @@ namespace CovidAPI.Services {
         }
 
         public static Region ReadRegion(string[] data, int idx) {
-            Region r = new Region();
-            r.Active = Int32.Parse(data[idx]);
-            r.ToDateConfirmed = Int32.Parse(data[idx+1]);
-            r.ToDateDeceased = Int32.Parse(data[idx+2]);
-            r.Vaccinated1st = Int32.Parse(data[idx+3]);
-            r.Vaccinated2nd = Int32.Parse(data[idx+4]);
-            r.Vaccinated3rd = Int32.Parse(data[idx+5]);
+            Region r = new() {
+                Active = Int32.Parse(data[idx]),
+                ToDateConfirmed = Int32.Parse(data[idx + 1]),
+                ToDateDeceased = Int32.Parse(data[idx + 2]),
+                Vaccinated1st = Int32.Parse(data[idx + 3]),
+                Vaccinated2nd = Int32.Parse(data[idx + 4]),
+                Vaccinated3rd = Int32.Parse(data[idx + 5])
+            };
 
             return r;
         }
