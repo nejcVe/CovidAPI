@@ -4,6 +4,8 @@ The API exposes two endpoints:
 
 ### `/api/region/cases`
 
+Requires authentication.
+
 Returns a `CasesDTO` for the selected region in the range of given dates.
 
 The request should be made with 3 query parameters:
@@ -23,6 +25,8 @@ The response is a JSON object with a list of `CasesDTO` for each day.
 
 ### `api/region/lastweek`
 
+No authentication required.
+
 Returns a `WeekAverageDTO` for each region for last week.
 
 Request is made without any parameters.
@@ -32,5 +36,13 @@ Response is a JSON object with a list of `WeekAverageDTO` sorted in descending o
 `WeekAverageDTO`:
 * `RegionName` : string (name of the region)
 * `AverageNewCases` : double (calculated average of daily new cases for each region)
+
+### Authentication
+
+The API uses Basic Authentication with username and password. To access the `/cases` endpoint you are required to provide your credentials.
+
+For testing purposes the accepted credentials are:
+* `username`: `user`
+* `password`: `covid_api_password`
 
 Data is retrieved daily from https://github.com/sledilnik/data/blob/master/csv/region-cases.csv

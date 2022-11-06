@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CovidAPI.Models;
 using CovidAPI.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CovidAPI.Controllers
 {
@@ -22,6 +23,7 @@ namespace CovidAPI.Controllers
         }
 
         [HttpGet("cases")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<CasesDTO>>> GetRegionStatsFromTo([FromQuery] string region, [FromQuery] string from, [FromQuery] string to)
         {
             try {
@@ -49,7 +51,7 @@ namespace CovidAPI.Controllers
                 return cases;
             }
             catch (Exception ex) {
-                return NotFound("Something went wrong.");
+                return NotFound();
             }
         }
 

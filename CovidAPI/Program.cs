@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using CovidAPI.Models;
 using CovidAPI.Services;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<CovidContext>(opt =>
     opt.UseInMemoryDatabase("CovidStats")); 
 builder.Services.AddScoped<DataRetrievalService>();
+builder.Services.AddAuthentication("BasicAuthentication").
+            AddScheme<AuthenticationSchemeOptions, BasicAuthenticationService>
+            ("BasicAuthentication", null);
+builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 var app = builder.Build();
@@ -33,6 +38,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
